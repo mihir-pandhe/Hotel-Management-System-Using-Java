@@ -2,9 +2,10 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.*;
 import java.util.ArrayList;
 
-class Room {
+class Room implements Serializable {
     int roomNumber;
     boolean isBooked;
 
@@ -25,10 +26,6 @@ public class HotelManagementSystem extends JFrame {
 
     public HotelManagementSystem() {
         rooms = new ArrayList<>();
-        for (int i = 1; i <= 10; i++) {
-            rooms.add(new Room(i));
-        }
-
         setTitle("Hotel Management System");
         setSize(400, 300);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -67,6 +64,28 @@ public class HotelManagementSystem extends JFrame {
                 cancelBooking();
             }
         });
+
+        loadRooms();
+    }
+
+    @SuppressWarnings("unchecked")
+    private void loadRooms() {
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream("rooms.dat"))) {
+            rooms = (ArrayList<Room>) ois.readObject();
+        } catch (Exception e) {
+            // If the file doesn't exist, initialize with some default rooms
+            for (int i = 1; i <= 10; i++) {
+                rooms.add(new Room(i));
+            }
+        }
+    }
+
+    private void saveRooms() {
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("rooms.dat"))) {
+            oos.writeObject(rooms);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private void viewRooms() {
@@ -83,6 +102,7 @@ public class HotelManagementSystem extends JFrame {
             if (room.roomNumber == roomNumber && !room.isBooked) {
                 room.isBooked = true;
                 textArea.append("Room " + roomNumber + " booked successfully.\n");
+                saveRooms();
                 return;
             }
         }
@@ -96,6 +116,7 @@ public class HotelManagementSystem extends JFrame {
             if (room.roomNumber == roomNumber && room.isBooked) {
                 room.isBooked = false;
                 textArea.append("Booking for room " + roomNumber + " cancelled successfully.\n");
+                saveRooms();
                 return;
             }
         }
