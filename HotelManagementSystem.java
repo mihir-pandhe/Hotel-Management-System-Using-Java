@@ -1,5 +1,8 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
-import java.util.Scanner;
 
 class Room {
     int roomNumber;
@@ -16,76 +19,95 @@ class Room {
     }
 }
 
-public class HotelManagementSystem {
+public class HotelManagementSystem extends JFrame {
     private ArrayList<Room> rooms;
+    private JTextArea textArea;
 
     public HotelManagementSystem() {
         rooms = new ArrayList<>();
         for (int i = 1; i <= 10; i++) {
             rooms.add(new Room(i));
         }
+
+        setTitle("Hotel Management System");
+        setSize(400, 300);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLayout(new BorderLayout());
+
+        textArea = new JTextArea();
+        add(new JScrollPane(textArea), BorderLayout.CENTER);
+
+        JPanel panel = new JPanel();
+        JButton viewRoomsButton = new JButton("View Rooms");
+        JButton bookRoomButton = new JButton("Book Room");
+        JButton cancelBookingButton = new JButton("Cancel Booking");
+
+        panel.add(viewRoomsButton);
+        panel.add(bookRoomButton);
+        panel.add(cancelBookingButton);
+        add(panel, BorderLayout.SOUTH);
+
+        viewRoomsButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                viewRooms();
+            }
+        });
+
+        bookRoomButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                bookRoom();
+            }
+        });
+
+        cancelBookingButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                cancelBooking();
+            }
+        });
     }
 
-    public void viewRooms() {
+    private void viewRooms() {
+        textArea.setText("");
         for (Room room : rooms) {
-            System.out.println(room);
+            textArea.append(room.toString() + "\n");
         }
     }
 
-    public void bookRoom(int roomNumber) {
+    private void bookRoom() {
+        String input = JOptionPane.showInputDialog(this, "Enter room number to book:");
+        int roomNumber = Integer.parseInt(input);
         for (Room room : rooms) {
             if (room.roomNumber == roomNumber && !room.isBooked) {
                 room.isBooked = true;
-                System.out.println("Room " + roomNumber + " booked successfully.");
+                textArea.append("Room " + roomNumber + " booked successfully.\n");
                 return;
             }
         }
-        System.out.println("Room not available or already booked.");
+        textArea.append("Room not available or already booked.\n");
     }
 
-    public void cancelBooking(int roomNumber) {
+    private void cancelBooking() {
+        String input = JOptionPane.showInputDialog(this, "Enter room number to cancel booking:");
+        int roomNumber = Integer.parseInt(input);
         for (Room room : rooms) {
             if (room.roomNumber == roomNumber && room.isBooked) {
                 room.isBooked = false;
-                System.out.println("Booking for room " + roomNumber + " cancelled successfully.");
+                textArea.append("Booking for room " + roomNumber + " cancelled successfully.\n");
                 return;
             }
         }
-        System.out.println("Room not found or not booked.");
+        textArea.append("Room not found or not booked.\n");
     }
 
     public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
-        HotelManagementSystem system = new HotelManagementSystem();
-
-        while (true) {
-            System.out.println("1. View Rooms");
-            System.out.println("2. Book Room");
-            System.out.println("3. Cancel Booking");
-            System.out.println("4. Exit");
-            int choice = scanner.nextInt();
-
-            switch (choice) {
-                case 1:
-                    system.viewRooms();
-                    break;
-                case 2:
-                    System.out.print("Enter room number to book: ");
-                    int roomNumberToBook = scanner.nextInt();
-                    system.bookRoom(roomNumberToBook);
-                    break;
-                case 3: 
-                    System.out.print("Enter room number to cancel booking: ");
-                    int roomNumberToCancel = scanner.nextInt();
-                    system.cancelBooking(roomNumberToCancel);
-                    break;
-                case 4:
-                    System.out.println("Exiting...");
-                    scanner.close();
-                    return;
-                default:
-                    System.out.println("Invalid choice. Please try again.");
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                new HotelManagementSystem().setVisible(true);
             }
-        }
+        });
     }
 }
