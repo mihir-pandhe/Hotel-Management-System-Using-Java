@@ -38,10 +38,14 @@ public class HotelManagementSystem extends JFrame {
         JButton viewRoomsButton = new JButton("View Rooms");
         JButton bookRoomButton = new JButton("Book Room");
         JButton cancelBookingButton = new JButton("Cancel Booking");
+        JButton searchRoomButton = new JButton("Search Room");
+        JButton roomSummaryButton = new JButton("Room Summary");
 
         panel.add(viewRoomsButton);
         panel.add(bookRoomButton);
         panel.add(cancelBookingButton);
+        panel.add(searchRoomButton);
+        panel.add(roomSummaryButton);
         add(panel, BorderLayout.SOUTH);
 
         viewRoomsButton.addActionListener(new ActionListener() {
@@ -65,6 +69,20 @@ public class HotelManagementSystem extends JFrame {
             }
         });
 
+        searchRoomButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                searchRoom();
+            }
+        });
+
+        roomSummaryButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                roomSummary();
+            }
+        });
+
         loadRooms();
     }
 
@@ -73,7 +91,6 @@ public class HotelManagementSystem extends JFrame {
         try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream("rooms.dat"))) {
             rooms = (ArrayList<Room>) ois.readObject();
         } catch (Exception e) {
-            // If the file doesn't exist, initialize with some default rooms
             for (int i = 1; i <= 10; i++) {
                 rooms.add(new Room(i));
             }
@@ -121,6 +138,31 @@ public class HotelManagementSystem extends JFrame {
             }
         }
         textArea.append("Room not found or not booked.\n");
+    }
+
+    private void searchRoom() {
+        String input = JOptionPane.showInputDialog(this, "Enter room number to search:");
+        int roomNumber = Integer.parseInt(input);
+        for (Room room : rooms) {
+            if (room.roomNumber == roomNumber) {
+                textArea.setText(room.toString());
+                return;
+            }
+        }
+        textArea.setText("Room not found.");
+    }
+
+    private void roomSummary() {
+        int availableCount = 0;
+        int bookedCount = 0;
+        for (Room room : rooms) {
+            if (room.isBooked) {
+                bookedCount++;
+            } else {
+                availableCount++;
+            }
+        }
+        textArea.setText("Available rooms: " + availableCount + "\nBooked rooms: " + bookedCount);
     }
 
     public static void main(String[] args) {
